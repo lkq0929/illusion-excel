@@ -5,7 +5,6 @@ excel import and export for yii2
 
 ####export:
 ...php
-<?php
 function export() {
 $cellData = [
             ['部门', '组别', '姓名', '性别'],
@@ -17,11 +16,9 @@ $cellData = [
         $fillData = $excel->export($cellData);
         $excel->download($fillData, 'test', 'Xls');
 }
-
 ...
 ###import:
 ...php
-<?php
 function import()
 {
 $excel = new excel\Excel($importFile->tempName);
