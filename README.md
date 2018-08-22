@@ -1,2 +1,2 @@
 # illusion-excel
-excel import and export for yii21111
+excel import and export for yii2
