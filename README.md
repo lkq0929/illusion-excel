@@ -4,7 +4,7 @@ excel import and export for yii2
 ###example:
 
 ####export:
-...
+...php
 <?php
 function export() {
 $cellData = [
