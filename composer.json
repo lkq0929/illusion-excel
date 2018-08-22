@@ -1,0 +1,22 @@
+{
+    "name": "illusion/yii2-excel",
+    "description": "excel import and export for yii2",
+    "type": "yii2-extension",
+    "keywords": ["yii2","excel","import","export","phpspreadsheet"],
+    "license": "BSD-4-Clause",
+    "authors": [
+        {
+            "name": "illusion",
+            "email": "lkqlink@163.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.0",
+        "phpoffice/phpspreadsheet": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "illusion\\excel\\": "src"
+        }
+    }
+}
