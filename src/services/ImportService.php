@@ -14,6 +14,8 @@ class ImportService
     /**
      * 将excel每一列与数据表中的属性对应
      *
+     * auth: lkqlink@163.com
+     *
      * @param array $rawData
      * @param array $attributes
      * @return array

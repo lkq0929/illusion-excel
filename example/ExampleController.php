@@ -1,33 +1,3 @@
-excel import and export for yii2
-================================
-excel import and export for yii2
-
-Installation
-------------
-
-The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
-
-Either run
-
-```
-php composer.phar require --prefer-dist illusion/yii2-excel "*"
-```
-
-or add
-
-```
-"illusion/yii2-excel": "*"
-```
-
-to the require section of your `composer.json` file.
-
-
-Usage
------
-
-Once the extension is installed, simply use it in your code by  :
-
-```php
 <?php
 /**
  * Created by PhpStorm.
@@ -58,16 +28,16 @@ class ExampleController extends Controller
      *
      * auth: lkqlink@163.com
      * ____________________________________________
-     * notes: 
+     * notes:
      * 将传入的数据填充到对应的单元格
      * export(array $cellData = [])
-     * 
+     *
      * @param $cellData 将
      * return Spreadsheet
      *____________________________________________
      * 将传入的数据填充到对应的单元格
      * download($spreadSheet, string $fileName, string $ext)
-     * 
+     *
      * @param $fillData 填充数据后的Spreadsheet实例
      * @param $fileName 导出的excel文件名
      * @param $ext  导出的excel文件名后缀
@@ -112,4 +82,3 @@ class ExampleController extends Controller
         return true;
     }
 }
-```

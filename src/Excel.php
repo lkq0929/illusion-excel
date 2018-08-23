@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  *
+ * auth: lkqlink@163.com
  * Date: 2018/8/7
  * Time: 14:23
  */
@@ -15,12 +16,10 @@ use yii\base\Component;
 
 class Excel extends Component {
     
-    public $tempPath; //文件的暂存路径
     
     public function __construct($tempPath = '')
     {
         parent::__construct([]);
-        $this->tempPath = $tempPath;
     }
     
     /**
@@ -72,15 +71,16 @@ class Excel extends Component {
      *
      * auth: lkqlink@163.com
      *
+     * @param string $tempPath
      * @param array $attributes
      * @param string $isRaw
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    public function import(array $attributes = [], string $isRaw = 'raw'): array
+    public function import(string $tempPath, array $attributes = [], string $isRaw = ''): array
     {
-        $tempFile = IOFactory::load($this->tempPath);
+        $tempFile = IOFactory::load($tempPath);
         $rawData  = $tempFile->getActiveSheet()->toArray('', true, true, false);
         $results = $isRaw === 'raw' ? $rawData : ImportService::columnToAttribute($rawData, $attributes);
         
