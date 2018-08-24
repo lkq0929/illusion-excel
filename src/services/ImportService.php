@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  *
+ * auth: lkqlink@163.com
  * Date: 2018/8/22
  * Time: 11:11
  */
@@ -13,8 +14,6 @@ class ImportService
 {
     /**
      * 将excel每一列与数据表中的属性对应
-     *
-     * auth: lkqlink@163.com
      *
      * @param array $rawData
      * @param array $attributes

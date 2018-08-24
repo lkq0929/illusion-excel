@@ -1,6 +1,17 @@
 <?php
-
+/**
+ * Created by PhpStorm.
+ *
+ * auth: lkqlink@163.com
+ * Date: 2018/8/7
+ * Time: 14:25
+ */
 namespace illusion\excel\services;
+
+use Exception;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 
 class ExportService
 {
@@ -9,7 +20,6 @@ class ExportService
      *
      * EXAMPLE: $number = 27,  可以生成 ['A'....'Z', 'AA']
      *
-     * auth: lkqlink@163.com
      *
      * @param int $number
      * @return array
@@ -46,8 +56,6 @@ class ExportService
     /**
      * 获取不同格式对应的浏览器内容输出类型
      *
-     * auth: lkqlink@163.com
-     *
      * @param string $ext
      * @return string
      */
@@ -60,6 +68,53 @@ class ExportService
         }
     
         return $mime;
+    }
+    
+    /**
+     * 处理文件名
+     *
+     * @param string $fullFileName
+     * @return array
+     * @throws Exception
+     */
+    public static function handleFileName(string $fullFileName): array
+    {
+        self::validate($fullFileName);
+        list($result['fileName'], $result['ext']) = explode('.', $fullFileName);
+        
+        return $result;
+    }
+    
+    /**
+     * 数据写入excel文件
+     *
+     * @param Spreadsheet $spreadsheet
+     * @param string $ext
+     * @return \PhpOffice\PhpSpreadsheet\Writer\IWriter
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public static function writeData(Spreadsheet $spreadsheet, string $ext): IWriter
+    {
+        $exportFile = IOFactory::createWriter($spreadsheet, ucfirst($ext));
+        
+        return $exportFile;
+    }
+    
+    /**
+     * 文件名的验证
+     *
+     * @param $attribute
+     * @return bool
+     * @throws Exception
+     */
+    public static function validate(string $attribute): bool
+    {
+        if (!preg_match("/(\.xls|\.xlsx|\.csv)/", strtolower($attribute)) || substr_count($attribute, '.') !== 1
+            || strpos($attribute, '.') === 0) {
+            throw new Exception('不合法的文件名');
+        }
+    
+        return true;
     }
     
 }

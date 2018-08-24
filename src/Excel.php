@@ -17,15 +17,13 @@ use yii\base\Component;
 class Excel extends Component {
     
     
-    public function __construct($tempPath = '')
+    public function __construct(array $config = [])
     {
-        parent::__construct([]);
+        parent::__construct($config);
     }
     
     /**
      * 填充数据到excel
-     *
-     * auth: lkqlink@163.com
      *
      * @param array $cellData
      * @return Spreadsheet
@@ -36,7 +34,8 @@ class Excel extends Component {
         $sheetInstance = new Spreadsheet();
         $sheetInstance->setActiveSheetIndex(0);
         $defaultWorkSheet = $sheetInstance->getActiveSheet();
-        $columns          = ExportService::generateColumn(\count($cellData[0]));
+        $columnCount      = isset($cellData[0]) ? \count($cellData[0]) : 0;
+        $columns          = ExportService::generateColumn($columnCount);
         foreach ($cellData as $row => $cellValues) {
             foreach ($cellValues as $column => $cellValue) {
                 $defaultWorkSheet->getColumnDimension($columns[$column])->setWidth('15');
@@ -50,26 +49,37 @@ class Excel extends Component {
     /**
      * 直接下载excel文件
      *
-     * auth: lkqlink@163.com
-     *
      * @param $spreadSheet
-     * @param string $fileName
-     * @param string $ext
+     * @param string $fullFileName
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    public function download($spreadSheet, string $fileName, string $ext)
+    public function download($spreadSheet, string $fullFileName)
     {
-        $exportFile = IOFactory::createWriter($spreadSheet, $ext);
-        $extToMime  = ExportService::getExtToMime($ext);
+        $excel = ExportService::handleFileName($fullFileName);
+        $exportFile = ExportService::writeData($spreadSheet, ucfirst($excel['ext']));
+        $extToMime  = ExportService::getExtToMime($excel['ext']);
         header('Content-Type:' . $extToMime);
-        header('Content-Disposition:attachment;filename="' . $fileName . '.' . $ext . '"');
+        header('Content-Disposition:attachment;filename="' . $fullFileName . '"');
         $exportFile->save('php://output');
     }
     
     /**
-     * 数据导入
+     * 生成的文件保存到本地
      *
-     * auth: lkqlink@163.com
+     * @param $spreadSheet
+     * @param string $attachPath  YII框架，默认的下载目录在we根目录下
+     * @param string $fullFileName
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function store($spreadSheet, string $fullFileName, string $attachPath = './')
+    {
+        $excel      = ExportService::handleFileName($fullFileName);
+        $exportFile = ExportService::writeData($spreadSheet, ucfirst($excel['ext']));
+        $exportFile->save($attachPath . $fullFileName);
+    }
+    
+    /**
+     * 数据导入
      *
      * @param string $tempPath
      * @param array $attributes
