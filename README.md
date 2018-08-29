@@ -54,7 +54,7 @@ class ExampleController extends Controller
     
     
     /**
-     * 导出数据下载或者保存数据到服务器
+     * 导出数据下载或者保存数据到服务器（目前只支持csv、xls、xlsx三种格式）
      *
      * @return bool
      */
