@@ -2,98 +2,42 @@
 /**
  * Created by PhpStorm.
  *
- * auth: lkqlink@163.com
- * Date: 2018/8/7
- * Time: 14:23
+ * Auth: lkqlink@163.com
+ * Date: 2018/8/28
+ * Time: 14:13
  */
 namespace illusion\excel;
 
-use illusion\excel\services\ExportService;
-use illusion\excel\services\ImportService;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use yii\base\Component;
 
-class Excel extends Component {
+class Excel extends Component
+{
+    protected $typeList;
     
-    
-    public function __construct(array $config = [])
+    public function __construct()
     {
-        parent::__construct($config);
+        parent::__construct();
+        $this->typeList = [
+            'csv'  => __NAMESPACE__ . '\Csv',
+            'xls'  => __NAMESPACE__ . '\Xls',
+            'xlsx' => __NAMESPACE__ . '\Xlsx',
+        ];
     }
     
     /**
-     * 填充数据到excel
+     * 根据传入类型来创建相应的电子表格对象
      *
-     * @param array $cellData
-     * @return Spreadsheet
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @param string $type
+     * @return mixed
+     * @throws NotSupportedException
      */
-    public function export(array $cellData = []): Spreadsheet
+    public function createSpreadSheet(string $type)
     {
-        $sheetInstance = new Spreadsheet();
-        $sheetInstance->setActiveSheetIndex(0);
-        $defaultWorkSheet = $sheetInstance->getActiveSheet();
-        $columnCount      = isset($cellData[0]) ? \count($cellData[0]) : 0;
-        $columns          = ExportService::generateColumn($columnCount);
-        foreach ($cellData as $row => $cellValues) {
-            foreach ($cellValues as $column => $cellValue) {
-                $defaultWorkSheet->getColumnDimension($columns[$column])->setWidth('15');
-                $defaultWorkSheet->setCellValue($columns[$column] . ($row + 1), $cellValue);
-            }
+        if (!array_key_exists(strtolower($type), $this->typeList)) {
+            throw new NotSupportedException();
         }
+        $className = new $this->typeList[$type];
         
-        return $sheetInstance;
-    }
-    
-    /**
-     * 直接下载excel文件
-     *
-     * @param $spreadSheet
-     * @param string $fullFileName
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-     */
-    public function download($spreadSheet, string $fullFileName)
-    {
-        $excel = ExportService::handleFileName($fullFileName);
-        $exportFile = ExportService::writeData($spreadSheet, ucfirst($excel['ext']));
-        $extToMime  = ExportService::getExtToMime($excel['ext']);
-        header('Content-Type:' . $extToMime);
-        header('Content-Disposition:attachment;filename="' . $fullFileName . '"');
-        $exportFile->save('php://output');
-    }
-    
-    /**
-     * 生成的文件保存到本地
-     *
-     * @param $spreadSheet
-     * @param string $attachPath  YII框架，默认的下载目录在we根目录下
-     * @param string $fullFileName
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-     */
-    public function store($spreadSheet, string $fullFileName, string $attachPath = './')
-    {
-        $excel      = ExportService::handleFileName($fullFileName);
-        $exportFile = ExportService::writeData($spreadSheet, ucfirst($excel['ext']));
-        $exportFile->save($attachPath . $fullFileName);
-    }
-    
-    /**
-     * 数据导入
-     *
-     * @param string $tempPath
-     * @param array $attributes
-     * @param string $isRaw
-     * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
-     */
-    public function import(string $tempPath, array $attributes = [], string $isRaw = ''): array
-    {
-        $tempFile = IOFactory::load($tempPath);
-        $rawData  = $tempFile->getActiveSheet()->toArray('', true, true, false);
-        $results = $isRaw === 'raw' ? $rawData : ImportService::columnToAttribute($rawData, $attributes);
-        
-        return $results;
+        return $className;
     }
 }
