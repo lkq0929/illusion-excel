@@ -12,19 +12,22 @@ namespace illusion\excel;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 
 class BaseSpreadSheet
 {
     public $phpOffice;
+    public $worksheet;
     
     public function __construct()
     {
         $this->phpOffice = new Spreadsheet();
+        $this->worksheet = new \illusion\excel\WorkSheet($this->phpOffice);
     }
     
     /**
-     * 写入数据
+     * 导出数据（默认单个sheet,三维数组对应多个工作表）
      *
      * @param array $values
      * @return Spreadsheet
@@ -32,15 +35,17 @@ class BaseSpreadSheet
      */
     public function write(array $values): Spreadsheet
     {
-        $columnCount = isset($values[0]) ? \count($values[0]) : 0;
-        $columns     = self::generateColumn($columnCount);
-        foreach ($values as $row => $value) {
-            foreach ($value as $column => $cellValue) {
-                $this->phpOffice->setActiveSheetIndex(0)->setCellValue($columns[$column] . ($row + 1), $cellValue);
-            }
+        
+        $valuesDepth = self::arrayDepth($values);
+        if ($valuesDepth <= 1 || $valuesDepth > 3) {
+            throw new \InvalidArgumentException('INVALID　PARAMS');
         }
         
-        return $this->phpOffice;
+        if ($valuesDepth === 2) {
+            $values = [$values];
+        }
+        
+        return $this->worksheet->mulWorksheet($values);
     }
     
     /**
@@ -53,8 +58,8 @@ class BaseSpreadSheet
      */
     public function read(string $path): array
     {
-        $tempFile = IOFactory::load($path);
-        $values   = $tempFile->getActiveSheet()->toArray('', true, true, false);
+        $spreadSheet = IOFactory::load($path); //就是电子表格实例
+        $values      = $this->worksheet->mulSheetData($spreadSheet);
         
         return $values;
     }
@@ -100,50 +105,14 @@ class BaseSpreadSheet
     }
     
     /**
-     * 根据一行的个数生成excel对应的title元素个数
-     *
-     * EXAMPLE: $number = 27,  可以生成 ['A'....'Z', 'AA']
-     *
-     * @param int $number
-     * @return array
-     */
-    public static function generateColumn(int $number = 0): array
-    {
-        $baseColumn = range('A', 'Z');
-        $columns    = $baseColumn;
-        if ($number > 26) {
-            $subColumn = $number - 26;
-            $mulColumn = floor($subColumn / 26);  //向下取整
-            $surColumn = $number - (($mulColumn + 1) * 26);
-            if ($mulColumn <= 0) {
-                for ($column = 0; $column < $subColumn; $column++) {
-                    $columns[] = $baseColumn[$mulColumn] . $baseColumn[$column];
-                }
-            } else {
-                for ($layer = 0; $layer < $mulColumn; $layer++) {
-                    for ($column = 0; $column < 26; $column++) {
-                        $columns[] = $baseColumn[$layer] . $baseColumn[$column];
-                    }
-                    if ($layer + 2 > $mulColumn) { //最后一层求余
-                        for ($column = 0; $column < $surColumn; $column++) {
-                            $columns[] = $baseColumn[$layer + 1] . $baseColumn[$column];
-                        }
-                    }
-                }
-            }
-        }
-        
-        return $columns;
-    }
-    
-    /**
      * 将excel每一列与数据表中的属性对应
      *
      * @param array $rawData
      * @param array $attributes
+     * @param int $filterByKey  根据第n列的数据过滤掉每行的空字符串
      * @return array
      */
-    public static function columnToAttribute(array $rawData, array $attributes): array
+    public function columnToAttribute(array $rawData, array $attributes, int $filterByKey = 0): array
     {
         $transformData = [];
         $attribute     = [];
@@ -152,7 +121,7 @@ class BaseSpreadSheet
         }
         
         foreach ($rawData as $key => $values) {
-            if ($key === 0) continue;
+            if ($key === 0 || $rawData[$key][$filterByKey] === '') continue;
             foreach ($values as $column => $value) {
                 $attribute[$attributes[$column]] = $value;
             }
@@ -171,7 +140,7 @@ class BaseSpreadSheet
      */
     public function columnTo(array $rawValues = [], array $attributes = []): array
     {
-        return static::columnToAttribute($rawValues, $attributes);
+        return $this->columnToAttribute($rawValues, $attributes);
     }
     
     /**
@@ -181,6 +150,27 @@ class BaseSpreadSheet
     {
         $this->phpOffice->disconnectWorksheets();
         unset($this->phpOffice);
+    }
+    
+    /**
+     * 判断数组的深度
+     *
+     * @param $array
+     * @return int
+     */
+    public static function arrayDepth(array $array): int
+    {
+        $maxDepth = 1;
+        foreach ($array as $value) {
+            if (\is_array($value)) {
+                $depth = self::arrayDepth($value) + 1;
+                if ($depth > $maxDepth) {
+                    $maxDepth = $depth;
+                }
+            }
+        }
+        
+        return $maxDepth;
     }
     
 }
