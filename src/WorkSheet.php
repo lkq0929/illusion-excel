@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class WorkSheet
 {
-    public $spreadsheet;
+    private $spreadsheet;
     
     public function __construct(Spreadsheet $spreadsheet)
     {

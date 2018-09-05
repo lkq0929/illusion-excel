@@ -17,8 +17,8 @@ use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 
 class BaseSpreadSheet
 {
-    public $phpOffice;
-    public $worksheet;
+    protected $phpOffice;
+    private $worksheet;
     
     public function __construct()
     {
@@ -109,7 +109,7 @@ class BaseSpreadSheet
      *
      * @param array $rawData
      * @param array $attributes
-     * @param int $filterByKey  根据第n列的数据过滤掉每行的空字符串
+     * @param int $filterByKey 根据第n列的数据过滤掉每行的空字符串
      * @return array
      */
     public function columnToAttribute(array $rawData, array $attributes, int $filterByKey = 0): array
