@@ -38,11 +38,18 @@ return [
     ],
 ];
 `````
-EXAMPLE LINK
+SAMPLE CODE LINK
 -----
 ```
 https://github.com/lkq0929/illusion-excel/tree/master/example
 ```
+NOTICE
+-----
+```
+目前只支持csv、xls、xlsx三种电子表格的导出和导入
+```
+SAMPLE CODE
+-----
 ```php
 <?php
 /**
