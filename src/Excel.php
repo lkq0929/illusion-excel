@@ -34,7 +34,7 @@ class Excel extends Component
     public function createSpreadSheet(string $type)
     {
         if (!array_key_exists(strtolower($type), $this->typeList)) {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Not Supported {$type} Type");
         }
         $className = new $this->typeList[$type];
         
