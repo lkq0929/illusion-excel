@@ -81,6 +81,7 @@ class WorkSheet
         $spreadsheet->setActiveSheetIndex($pIndex);
         foreach ($values as $row => $value) {
             foreach ($value as $column => $cellValue) {
+                $this->getCurrentActiveSheet()->getColumnDimension($columns[$column])->setAutoSize(true);
                 $this->getCurrentActiveSheet()->setCellValue($columns[$column] . ($row + 1), $cellValue);
             }
         }
