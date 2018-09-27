@@ -181,10 +181,14 @@ class Spreadsheet extends Component
      *
      * @param $spreadsheetName
      * @param $suffix
+     * @throws NotSupportedException
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function download($spreadsheetName, $suffix)
     {
+        if (!static::isSupportSuffix($suffix)) {
+            throw new NotSupportedException("NOT SUPPORTED {$suffix} TYPE");
+        }
         $this->setSpreadsheetName($spreadsheetName);
         $this->setSuffix($suffix);
         $this->setHeader();
@@ -195,12 +199,16 @@ class Spreadsheet extends Component
      * 保存电子表到服务器，Yii框架默认下载到web目录下，保存路径可自定义
      *
      * @param $spreadsheetName
-     * @param string $path
      * @param $suffix
+     * @param string $path
+     * @throws NotSupportedException
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function store($spreadsheetName, $suffix, string $path = './')
     {
+        if (!static::isSupportSuffix($suffix)) {
+            throw new NotSupportedException("NOT SUPPORTED {$suffix} TYPE");
+        }
         $this->setSpreadsheetName($spreadsheetName);
         $this->setSuffix($suffix);
         $this->writerToType($this->suffix)->save($path . $this->name . '.' . $this->suffix);
