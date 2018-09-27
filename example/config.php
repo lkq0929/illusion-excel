@@ -10,7 +10,7 @@
 return [
     'components' => [
         'excel' => [
-            'class' => 'illusion\excel\Excel',
+            'class' => 'illusion\excel\Spreadsheet',
         ],
     ],
 ];

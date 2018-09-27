@@ -11,8 +11,6 @@ Either run
 
 ```
 php composer.phar require --prefer-dist illusion/yii2-excel "*"
-下载一个具体的版本：
-example: composer require illusion/yii2-excel 1.2.0
 ```
 
 or add
@@ -33,23 +31,16 @@ Once the extension is installed, simply use it in your code by  :
 return [
     'components' => [
         'excel' => [
-            'class' => 'illusion\excel\Excel',
+            'class' => 'illusion\excel\Spreadsheet',
         ],
     ],
 ];
 `````
-SAMPLE CODE LINK
+EXAMPLE LINK
 -----
 ```
 https://github.com/lkq0929/illusion-excel/tree/master/example
 ```
-NOTICE
------
-```
-目前只支持csv、xls、xlsx三种电子表格的导出和导入
-```
-SAMPLE CODE
------
 ```php
 <?php
 /**
@@ -69,7 +60,7 @@ use yii\web\UploadedFile;
 class ExampleController extends Controller
 {
     /**
-     * 单电子表(sheet)、多电子表格导出
+     * 单工作表(sheet)、多工作表的电子表格导出
      * 导出文件可直接浏览器下载或保存至服务器
      */
     public function actionExport()
@@ -96,9 +87,9 @@ class ExampleController extends Controller
                 ['科技类', '物联网起源', '￥500']
             ],
         ];
-        $spreadsheet    = \Yii::$app->excel->createSpreadSheet('xls'); // 'xls' 自定义电子表格后缀
-        $spreadsheet->write($cellData);
-        $spreadsheet->download('department'); //'department' 自定义电子表格名
+        \Yii::$app->excel->write($cellData);
+        \Yii::$app->excel->download('department','xls'); //'department' 自定义电子表格名,直接下载名称为department.xls的文件
+        //\Yii::$app->excel->store('department','xls','./'); //'department' 自定义电子表格名,保存名称为department.xls
     }
     
     /**
@@ -109,19 +100,17 @@ class ExampleController extends Controller
      */
     public function actionImport()
     {
-        $transData  = [];
-        $attributes = [
-            'department' => ['department', 'group', 'name', 'sex'],  //'department' 工作表(sheet)名  键值：['department', 'group', 'name', 'sex']列对应的名称,名称顺序必须一致
-            'book'       => ['category', 'book_name', 'price'],
+        $transData   = [];
+        $attributes  = [
+            'one' => ['department', 'group', 'name', 'sex'],
+            'two' => ['category', 'book_name', 'price'],
         ];
         if (\Yii::$app->request->isPost) {
-            $importFile = UploadedFile::getInstanceByName('file');
+            $importFile  = UploadedFile::getInstanceByName('file');
         }
-        $fileName    = explode('.', $importFile->name);
-        $spreadsheet = \Yii::$app->excel->createSpreadSheet($fileName[1]); // $fileName[1] 自定义电子表格后缀
-        $rawDatas    = $spreadsheet->read($importFile->tempName); //$importFile->tempName 电子表（excel）路径
-        foreach ($rawDatas as $sheetName => $rawData) {
-            $transData[] = $spreadsheet->columnTo($rawData, $attributes[$sheetName]);  //$rawData 读出的单个工作表(sheet)的原生数据，$attributes[$sheetName] $rawData电子表格中列按照顺序对应的自定义列名
+        $rawDatas    = \Yii::$app->excel->read($importFile->tempName);
+        foreach($rawDatas as  $sheetName => $rawData) {
+            $transData[] = \Yii::$app->excel->rawValuesToAttribute($rawData, $attributes[$sheetName]);
         }
         
         return $transData;
@@ -138,10 +127,8 @@ class ExampleController extends Controller
         if (\Yii::$app->request->isPost) {
             $importFile = UploadedFile::getInstanceByName('file');
         }
-        $fileName    = explode('.', $importFile->name);
-        $spreadsheet = \Yii::$app->excel->createSpreadSheet($fileName[1]); //同上注释
-        $rawDatas    = $spreadsheet->read($importFile->tempName);
-        
+        $rawDatas  = \Yii::$app->excel->read($importFile->tempName);
+
         return $rawDatas;
     }
 }

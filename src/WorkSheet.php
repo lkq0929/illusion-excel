@@ -3,109 +3,53 @@
  * Created by PhpStorm.
  *
  * Auth: lkqlink@163.com
- * Date: 2018/8/31
- * Time: 11:04
+ * Date: 2018/9/26
+ * Time: 17:06
  */
 
 namespace illusion\excel;
 
-
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-class WorkSheet
+class Worksheet
 {
-    private $spreadsheet;
+    /**
+     * @var 工作表名称
+     */
+    private $sheetName;
+    
+    
+    private $_spreadsheet;
     
     public function __construct(Spreadsheet $spreadsheet)
     {
-        $this->spreadsheet = $spreadsheet;
+        $this->_spreadsheet = $spreadsheet;
     }
     
     /**
-     * 清除第一张工作表
+     * 设置工作表的名称
      *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @param $sheetName
      */
-    public function clearFirstSheet()
+    public function setSheetName($sheetName)
     {
-        if (isset($this->spreadsheet->getAllSheets()[0])) {
-            $this->spreadsheet->removeSheetByIndex(0);
-        }
+        $this->sheetName = $sheetName;
     }
     
     /**
-     * 获取当前的活动工作表
+     * 根据列数计算需要占用到的列的字母表示
      *
-     * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     */
-    public function getCurrentActiveSheet(): \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
-    {
-        return $this->spreadsheet->getActiveSheet();
-    }
-    
-    /**
-     * 导出多个电子工作表的电子表格
-     *
-     * @param array $mulValues
-     * @return Spreadsheet
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     */
-    public function mulWorksheet(array $mulValues): Spreadsheet
-    {
-        $pIndex = -1;
-        $this->clearFirstSheet();
-        foreach ($mulValues as $sheetName => $mulValue) {
-            $this->writeSingleSheet($mulValue, $sheetName, ++$pIndex);
-        }
-        return $this->spreadsheet;
-    }
-    
-    /**
-     * 给当前活动的工作表填充数据
-     *
-     * @param array $values
-     * @param string $sheetName
-     * @param int $pIndex
-     * @return Spreadsheet
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     */
-    public function writeSingleSheet(array $values, string $sheetName = 'worksheet', $pIndex = 0): Spreadsheet
-    {
-        $spreadsheet = $this->spreadsheet;
-        if (!isset($values[0])) {
-            throw new \InvalidArgumentException('INVALID PARAMS');
-        }
-        $columns = self::generateColumn(\count($values[0]));
-        $spreadsheet->createSheet();
-        $spreadsheet->setActiveSheetIndex($pIndex);
-        foreach ($values as $row => $value) {
-            foreach ($value as $column => $cellValue) {
-                $this->getCurrentActiveSheet()->getColumnDimension($columns[$column])->setAutoSize(true);
-                $this->getCurrentActiveSheet()->setCellValue($columns[$column] . ($row + 1), $cellValue);
-            }
-        }
-        $this->getCurrentActiveSheet()->setTitle($sheetName);
-        
-        return $spreadsheet;
-    }
-    
-    /**
-     * 根据一行的个数生成excel对应的title元素个数
-     *
-     * EXAMPLE: $number = 27,  可以生成 ['A'....'Z', 'AA']
-     *
-     * @param int $number
+     * @param $columnNum
      * @return array
      */
-    public static function generateColumn(int $number = 0): array
+    public static function calculateColumnAlphabet($columnNum): array
     {
         $baseColumn = range('A', 'Z');
         $columns    = $baseColumn;
-        if ($number > 26) {
-            $subColumn = $number - 26;
+        if ($columnNum > 26) {
+            $subColumn = $columnNum - 26;
             $mulColumn = floor($subColumn / 26);  //向下取整
-            $surColumn = $number - (($mulColumn + 1) * 26);
+            $surColumn = $columnNum - (($mulColumn + 1) * 26);
             if ($mulColumn <= 0) {
                 for ($column = 0; $column < $subColumn; $column++) {
                     $columns[] = $baseColumn[$mulColumn] . $baseColumn[$column];
@@ -128,14 +72,84 @@ class WorkSheet
     }
     
     /**
-     * 读取单个电子表数据
+     * 删掉第一个工作表
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function clearFirstSheet()
+    {
+        if (isset($this->_spreadsheet->getAllSheets()[0])) {
+            $this->_spreadsheet->removeSheetByIndex(0);
+        }
+    }
+    
+    /**
+     * 获取当前的活动工作表
+     *
+     * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function getCurrentActiveSheet(): \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
+    {
+        return $this->_spreadsheet->getActiveSheet();
+    }
+    
+    /**
+     * 填充数据到工作表
+     *
+     * @param array $values
+     * @param string $sheetName
+     * @param int $pIndex
+     * @return Spreadsheet
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function fillValuesToSheet(array $values, string $sheetName = 'worksheet', $pIndex = 0): Spreadsheet
+    {
+        $spreadsheet = $this->_spreadsheet;
+        if (!isset($values[0])) {
+            throw new \InvalidArgumentException('INVALID PARAMS');
+        }
+        $columns = self::calculateColumnAlphabet(\count($values[0]));
+        $spreadsheet->createSheet();
+        $spreadsheet->setActiveSheetIndex($pIndex);
+        foreach ($values as $row => $value) {
+            foreach ($value as $column => $cellValue) {
+                $this->getCurrentActiveSheet()->getColumnDimension($columns[$column])->setAutoSize(true);
+                $this->getCurrentActiveSheet()->setCellValue($columns[$column] . ($row + 1), $cellValue);
+            }
+        }
+        $this->getCurrentActiveSheet()->setTitle($sheetName);
+    
+        return $spreadsheet;
+    }
+    
+    /**
+     * 填充数据到多个工作表
+     *
+     * @param array $values
+     * @return Spreadsheet
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function fillValuesToSheets(array $values): Spreadsheet
+    {
+        $pIndex = -1;
+        $this->clearFirstSheet();
+        foreach ($values as $sheetName => $value) {
+            $this->fillValuesToSheet($value, $sheetName, ++$pIndex);
+        }
+    
+        return $this->_spreadsheet;
+    }
+    
+    /**
+     * 获取当前工作表数据
      *
      * @param Spreadsheet $spreadsheet
      * @param int $pIndex
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function readSingleSheet(Spreadsheet $spreadsheet, int $pIndex = 0): array
+    public function getSheetValues(Spreadsheet $spreadsheet, int $pIndex = 0): array
     {
         $spreadsheet->setActiveSheetIndex($pIndex);
         $rawData = $spreadsheet->getActiveSheet()->toArray('', true, true, false);
@@ -144,18 +158,18 @@ class WorkSheet
     }
     
     /**
-     * 读取多个电子表数据
+     * 获取电子表中的所有工作表的数据
      *
      * @param Spreadsheet $spreadsheet
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function mulSheetData(Spreadsheet $spreadsheet): array
+    public function getSheetsValues(Spreadsheet $spreadsheet): array
     {
         $values     = [];
         $sheetNames = $spreadsheet->getSheetNames();
         foreach ($sheetNames as $pIndex => $sheetName) {
-            $values[$sheetName] = $this->readSingleSheet($spreadsheet, $pIndex);
+            $values[$sheetName] = $this->getSheetValues($spreadsheet, $pIndex);
         }
         
         if (\count($values) === 1) {  //单sheet工作簿数据降维处理
@@ -164,5 +178,4 @@ class WorkSheet
         
         return $values;
     }
-    
 }

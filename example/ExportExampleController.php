@@ -19,17 +19,15 @@ class ExportExampleController extends Controller
      */
     public function actionExportSheet()
     {
-        $rows        = [
+        $rows = [
             ['部门', '组别', '姓名', '性别'],
             ['一米技术部', 'oms', 'illusion', '男'],
             ['一米技术部', 'oms', 'alex', '男'],
             ['一米技术部', 'pms', 'aaron', '女']
         ];
-        $spreadsheet = new Excel();
-        $sheet       = $spreadsheet->createSpreadSheet('xls');  //xls  电子表格文件类型
-        $sheet->write($rows);
-        $sheet->download('department');  //department 电子表格文件名
-        //$sheetOne->store('department', './department');  //'department' 电子表格文件名  './department'  文件保存路径(实际保存位置：web/department/department.xls)
+        \Yii::$app->excel->write($rows);
+        \Yii::$app->excel->store('department', 'xls', './department'); //'department' 电子表格文件名  'xls' 后缀 './department'  文件保存路径(实际保存位置：web/department/department.xls)
+        //\Yii::$app->excel->download('department','xls');
     }
     
     /**
@@ -37,7 +35,7 @@ class ExportExampleController extends Controller
      */
     public function actionExportSheets()
     {
-        $sheetRows = [
+        $mulValues = [
             'one' => [
                 ['部门', '组别', '姓名', '性别'],
                 ['一米技术部', 'oms', 'illusion', '男'],
@@ -52,10 +50,8 @@ class ExportExampleController extends Controller
             ],
         ];
         
-        $spreadsheet = new Excel();
-        $sheets      = $spreadsheet->createSpreadSheet('xls');  //xls  电子表格文件类型
-        $sheets->write($sheetRows);
-        $sheets->download('department');  //department 电子表格文件名
-        //$sheetOne->store('department', './department');  //'department' 电子表格文件名  './department'  文件保存路径(实际保存位置：web/department/department.xls)
+        \Yii::$app->excel->write($mulValues);
+        \Yii::$app->excel->store('department', 'xls', './department'); //'department' 电子表格文件名  'xls' 后缀 './department'  文件保存路径(实际保存位置：web/department/department.xls)}
+        //\Yii::$app->excel->download('department','xls');
     }
 }
