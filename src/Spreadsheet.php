@@ -10,6 +10,7 @@
 namespace illusion\excel;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Spreadsheet as phpSpreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 use yii\base\Component;
@@ -225,8 +226,45 @@ class Spreadsheet extends Component
     public function read($path): array
     {
         $spreadSheet = IOFactory::load($path);
-        $rawValues   = $this->worksheet->getSheetsValues($spreadSheet);
         
+        return $this->getSheetsValues($spreadSheet);
+    }
+    
+    /**
+     * csv文件数据读取
+     *
+     * @param $path
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     */
+    public function readForCsv($path): array
+    {
+        
+        $file = fopen($path, "r");
+        while (!feof($file)) {
+            $data[] = fgetcsv($file);
+        }
+        $data = eval('return ' . iconv('gbk', 'utf-8', var_export($data, true)) . ';');
+        foreach ($data as $key => $value) {
+            if (!$value) {
+                unset($data[$key]);
+            }
+        }
+        fclose($file);
+    
+        return $data;
+    }
+    
+    /**
+     *
+     *
+     * @param $spreadSheet
+     * @return array
+     */
+    public function getSheetsValues($spreadSheet): array
+    {
+        $rawValues   = $this->worksheet->getSheetsValues($spreadSheet);
+    
         return $rawValues;
     }
     
@@ -268,6 +306,7 @@ class Spreadsheet extends Component
         
         return $transformData;
     }
+    
     
     /**
      * 释放内存
