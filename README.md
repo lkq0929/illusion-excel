@@ -130,6 +130,46 @@ class ExampleController extends Controller
         $rawDatas  = \Yii::$app->excel->read($importFile->tempName);
 
         return $rawDatas;
+    }   
+    
+    /**********************后缀csv格式的电子表格的两种读取方式，推荐方式一************************/
+    /*注意csv格式的电子表格只能以单工作表模式（也就是一个文件一个sheet，不支持多sheet工作模式）*/
+    
+    /**
+     *  方式一：
+     *  **注意设置电子表格后缀
+     * 将把自定义的属性（['name', 'sex', 'age']）映射到工作表对应的列，方便直接后面直接插入数据表
+     * 根据喜欢的方式插入数据表
+     *
+     * @return mixed
+     */
+    public function actionImportCsvToAttr()
+    {
+        if (\Yii::$app->request->isPost) {
+            $importFile = UploadedFile::getInstanceByName('file');
+        }
+        $spreadsheet = \Yii::$app->excel;
+        list($fileName, $ext) = explode('.', $importFile->name);
+        $spreadsheet->setSuffix($ext);  //设置电子表格后缀
+        $rawData = $spreadsheet->rawValuesToAttribute($spreadsheet->read($importFile->tempName), ['name', 'sex', 'age']); //单工作表格：将自定义的列名称映射到对应的电子表格中的列名称
+
+        return $rawData;
+    }
+    /**
+     * 方式二：
+     * 读出csv格式电子表格的原生数据
+     * 根据喜欢的方式插入数据表
+     *
+     * @return mixed
+     */
+    public function actionImportCsvRaw()
+    {
+        if (\Yii::$app->request->isPost) {
+            $importFile = UploadedFile::getInstanceByName('file');
+        }
+        $rawDatas  = \Yii::$app->excel->readForCsv($importFile->tempName);
+
+        return $rawDatas;
     }
 }
 ```

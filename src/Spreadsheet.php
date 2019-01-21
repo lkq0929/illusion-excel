@@ -36,7 +36,7 @@ class Spreadsheet extends Component
     /**
      * @var 文件后缀
      */
-    private $suffix;
+    private $suffix = 'xls';
     
     /**
      * @var 工作表
@@ -220,13 +220,19 @@ class Spreadsheet extends Component
      *
      * @param $path
      * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws NotSupportedException
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
     public function read($path): array
     {
+        if (!static::isSupportSuffix($this->suffix)) {
+            throw new NotSupportedException("NOT SUPPORTED {$this->suffix} TYPE");
+        }
+        if ($this->suffix === 'csv') {
+            return $this->readForCsv($path);
+        }
         $spreadSheet = IOFactory::load($path);
-        
+    
         return $this->getSheetsValues($spreadSheet);
     }
     
@@ -235,7 +241,6 @@ class Spreadsheet extends Component
      *
      * @param $path
      * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
     public function readForCsv($path): array
     {

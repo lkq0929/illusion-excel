@@ -54,4 +54,25 @@ class ImportExampleController extends Controller
         return $transData;
     }
     
+    /**
+     * .csv格式的文件只能工作在（单sheet）模式下
+     * csv后缀的excel文件处理
+     *
+     * @return mixed
+     */
+    public function actionImportCsv()
+    {
+        $spreadSheet = \Yii::$app->excel;
+        $customAttr  = ['name', 'sex', 'age']; //自定义属性
+        if (\Yii::$app->request->isPost) {
+            $importFile = UploadedFile::getInstanceByName('file');
+        }
+        list($fileName, $ext) = explode('.', $importFile->name);
+        $spreadSheet->setSuffix($ext);  //设置电子表格后缀
+        //将把自定义的属性映射到工作表对应的列，方便直接后面直接插入数据表
+        $rawData = $spreadSheet->rawValuesToAttribute($spreadSheet->read($importFile->tempName), $customAttr);
+        
+        return $rawData;
+    }
+    
 }
