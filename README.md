@@ -171,5 +171,21 @@ class ExampleController extends Controller
 
         return $rawDatas;
     }
+    
+    /**
+     * 读出csv格式电子表格的原生数据
+     * 根据喜欢的方式插入数据表
+     *
+     * @return mixed
+     */
+    public function actionImportCsvRaw()
+    {
+        if (\Yii::$app->request->isPost) {
+            $importFile = UploadedFile::getInstanceByName('file');
+        }
+        $rawDatas  = \Yii::$app->excel->readForCsv($importFile->tempName);
+
+        return $rawDatas;
+    }
 }
 ```
