@@ -4,7 +4,7 @@ excel import and export for yii2
 
 Installation
 ------------
-**若在安装该php扩展包之前安装了phpoffice/phpspreadsheet扩展包，请删除或者修改该安装包的配置项为（ "phpoffice/phpspreadsheet": "^1.4"）,执行composer install，成功后。然后再按照正常的下载该安装包的流程。**
+**若在安装该php扩展包之前安装了phpoffice/phpspreadsheet扩展包，请删除或者修改该扩展包的配置项为（ "phpoffice/phpspreadsheet": "^1.4"）,执行composer install，成功后。然后再按照正常的下载该扩展包的流程执行。**
 ```
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
