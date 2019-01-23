@@ -261,7 +261,7 @@ class Spreadsheet extends Component
     }
     
     /**
-     *
+     * 获取电子表中所有工作表（worksheet）的数据
      *
      * @param $spreadSheet
      * @return array
